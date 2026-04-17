@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.5, user-scalable=yes">
+  <title>💥 Escape Room · Conversas Numéricas</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+    }
+    body {
+      background: #1a2e3f;
+      background-image: radial-gradient(circle at 20% 30%, #234a5e, #0f2838);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-family: 'Segoe UI', 'Roboto', system-ui, sans-serif;
+      padding: 8px;
+      margin: 0;
+    }
+    .game-container {
+      max-width: 1050px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(8px);
+      border-radius: 28px;
+      padding: 14px 18px 18px;
+      box-shadow: 0 12px 25px rgba(0, 0, 0, 0.5), 0 0 0 2px #d4b87a inset;
+      border: 1px solid #efd9a8;
+      position: relative;
+    }
+    h1 {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 700;
+      font-size: 1.6rem;
+      letter-spacing: -0.3px;
+      color: #fbf3e0;
+      text-shadow: 2px 2px 0 #1e3b4f;
+      margin: 0 0 8px 0;
+    }
+    h1 span {
+      background: #e5c687;
+      padding: 3px 12px;
+      border-radius: 30px;
+      font-size: 0.9rem;
+      color: #1a2e3f;
+      text-shadow: none;
+      box-shadow: inset 0 1px 3px #bba267, 0 2px 0 #5e4a2b;
+    }
+    .etapas-painel {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .etapa-btn {
+      flex: 1 1 110px;
+      background: #2e4d66;
+      border: none;
+      border-bottom: 4px solid #0f1f2b;
+      color: #f0e5d2;
+      padding: 8px 5px;
+      font-size: 0.9rem;
+      font-weight: bold;
+      border-radius: 25px 25px 14px 14px;
+      cursor: pointer;
+      box-shadow: 0 3px 0 #0f1f2b, 0 3px 6px rgba(0,0,0,0.2);
+      transition: all 0.1s;
+      text-align: center;
+    }
+    .etapa-btn.ativo {
+      background: #dbb86a;
+      color: #1d2e3c;
+      border-bottom-color: #876e38;
+      box-shadow: 0 2px 0 #5e4a2b, 0 3px 6px rgba(0,0,0,0.2);
+      transform: translateY(2px);
+    }
+    .progresso-area {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      margin: 0 4px 6px;
+    }
+    .etapa-nome {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: #1b3b4e;
+      border-left: 5px solid #d4a742;
+      padding-left: 10px;
+    }
+    .questao-indice {
+      background: #1a2e3f;
+      padding: 4px 12px;
+      border-radius: 20px;
+      color: #f2e0b0;
+      font-weight: bold;
+      font-size: 0.95rem;
+      box-shadow: inset 0 1px 3px #0c1a24, 0 2px 0 #dbb86a;
+    }
+    .timer-card {
+      background: #172e3c;
+      border-radius: 40px;
+      padding: 4px 16px;
+      display: inline-block;
+      margin: 4px 0 8px;
+      box-shadow: 0 4px 0 #0b1922, inset 0 0 0 2px #a77b2c;
+    }
+    .timer-display {
+      font-size: 2.4rem;
+      font-family: 'Courier New', monospace;
+      font-weight: 800;
+      color: #fad98b;
+      text-shadow: 0 0 4px #fabc3b;
+      letter-spacing: 3px;
+    }
+
+    /* NOVO: seletor de tempo */
+    .timer-config {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-left: 15px;
+    }
+    .timer-config label {
+      color: #f0e5d2;
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-shadow: 1px 1px 0 #1a2e3f;
+    }
+    .tempo-select {
+      background: #e9dbc4;
+      border: 2px solid #a77b2c;
+      border-radius: 30px;
+      padding: 4px 10px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      color: #1a2e3f;
+      cursor: pointer;
+      box-shadow: inset 0 1px 3px #ab8e64, 0 2px 0 #6d4f2a;
+    }
+
+    .questao-box {
+      background: #e9dbc4;
+      border-radius: 30px;
+      padding: 6px 20px;
+      margin: 6px 0 10px;
+      border: 2px dashed #7a5d2e;
+      box-shadow: inset 0 2px 5px #ab8e64, 0 4px 0 #6d4f2a;
+    }
+    .operacao-grande {
+      font-size: 2.8rem;
+      font-weight: 800;
+      text-align: center;
+      color: #162b37;
+      word-break: break-word;
+      line-height: 1.2;
+    }
+    .estrategias-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin: 16px 0 12px;
+    }
+    .campo-estrategia {
+      background: #fcf7ef;
+      border-radius: 20px;
+      padding: 10px 8px 8px;
+      box-shadow: inset 0 2px 5px #bba98b, 0 5px 0 #7a684b;
+      border: 1px solid #b49b72;
+    }
+    .campo-estrategia textarea {
+      width: 100%;
+      height: 130px;
+      background: #fffbf4;
+      border: 2px solid #bfa26b;
+      border-radius: 14px;
+      padding: 10px 12px;
+      font-size: 1.1rem;
+      font-family: inherit;
+      resize: vertical;
+      box-shadow: inset 0 2px 4px #cbb591;
+      color: #1d2e3c;
+      font-weight: 500;
+      line-height: 1.4;
+    }
+    .campo-estrategia label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 700;
+      color: #4d3113;
+      font-size: 1rem;
+    }
+    .botoes-controle {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+    .btn {
+      background: #ced9e0;
+      border: none;
+      border-bottom: 3px solid #5f7685;
+      padding: 8px 14px;
+      font-size: 1rem;
+      font-weight: bold;
+      border-radius: 30px;
+      color: #0f262f;
+      cursor: pointer;
+      box-shadow: 0 2px 0 #3d535f, 0 2px 5px black;
+      transition: 0.07s;
+    }
+    .btn.primary {
+      background: #e5bc6e;
+      border-bottom-color: #9e7b40;
+      color: #15242e;
+      box-shadow: 0 2px 0 #7a5d30, 0 2px 5px black;
+    }
+    .btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 0 #3d535f, 0 2px 5px black;
+    }
+    .resposta-correta {
+      background: #1b452b;
+      padding: 8px 22px;
+      border-radius: 30px;
+      color: #f3e2b5;
+      font-size: 2.2rem;
+      font-weight: bold;
+      margin-left: auto;
+      box-shadow: inset 0 2px 6px #0a1f0e, 0 3px 0 #0e2d16;
+      border-left: 5px solid #e6b422;
+      text-align: center;
+      min-width: 130px;
+    }
+    .acoes-final {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 12px;
+    }
+    .feedback-tempo {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #c92e2e;
+      background: #fee;
+      padding: 5px 16px;
+      border-radius: 25px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .lista-questoes-rapida {
+      display: flex;
+      gap: 5px;
+      margin: 6px 0 2px;
+      flex-wrap: wrap;
+    }
+    .bolinha-questao {
+      background: #334e5e;
+      color: #ddcba4;
+      width: 32px;
+      height: 32px;
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1rem;
+      cursor: pointer;
+      border-bottom: 2px solid #0f1e26;
+      transition: 0.1s;
+    }
+    .bolinha-questao.ativa {
+      background: #e1b152;
+      color: #0d262f;
+      border-bottom-color: #896f35;
+      transform: scale(1.05);
+    }
+    footer {
+      margin-top: 10px;
+      color: #d4c5ab;
+      text-align: right;
+      font-size: 0.7rem;
+    }
+
+    /* 💥 EXPLOSÃO CENTRAL */
+    .explosao-overlay {
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      pointer-events: none;
+      z-index: 999;
+    }
+    .explosao-mensagem {
+      background: rgba(20,10,5,0.85);
+      backdrop-filter: blur(8px);
+      padding: 30px 60px;
+      border-radius: 80px;
+      border: 6px solid #ffb347;
+      box-shadow: 0 0 70px #ff7b00, 0 0 140px #ff4d00;
+      font-size: 6rem;
+      font-weight: 900;
+      color: #fff3d1;
+      text-shadow: 6px 6px 0 #a12200, 0 0 30px red;
+      letter-spacing: 12px;
+      animation: explodePulse 0.4s infinite alternate, fadeOut 2.5s forwards;
+      transform: scale(1);
+      text-align: center;
+      line-height: 1.3;
+    }
+    @keyframes explodePulse {
+      0% { transform: scale(1); text-shadow: 6px 6px 0 #a12200, 0 0 30px red; }
+      100% { transform: scale(1.2); text-shadow: 10px 10px 0 #a12200, 0 0 60px orange; }
+    }
+    @keyframes fadeOut {
+      0% { opacity: 1; }
+      70% { opacity: 1; }
+      100% { opacity: 0; visibility: hidden; }
+    }
+  </style>
+</head>
+<body>
+<div class="game-container">
+  <h1>🧮 CONVERSAS NUMÉRICAS <span>ESCAPE ROOM</span></h1>
+
+  <div class="etapas-painel">
+    <button class="etapa-btn ativo" data-etapa="0">🔹 SEÇÃO 1</button>
+    <button class="etapa-btn" data-etapa="1">🔸 SEÇÃO 2</button>
+    <button class="etapa-btn" data-etapa="2">🔹 SEÇÃO 3</button>
+  </div>
+
+  <div class="progresso-area">
+    <div class="etapa-nome" id="nomeEtapa">Seção 1 – Rodada Inicial</div>
+    <div class="questao-indice" id="contadorQuestao">1 / 5</div>
+  </div>
+
+  <!-- Timer + seletor de tempo lado a lado -->
+  <div style="display: flex; align-items: center; flex-wrap: wrap; gap: 10px;">
+    <div class="timer-card">
+      <span class="timer-display" id="timerDisplay">01:00</span>
+    </div>
+    <div class="timer-config">
+      <label for="tempoSelect">⏱️ Tempo:</label>
+      <select id="tempoSelect" class="tempo-select">
+        <option value="30">30 segundos</option>
+        <option value="60" selected>1 minuto</option>
+        <option value="120">2 minutos</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="questao-box">
+    <div class="operacao-grande" id="operacaoAtual">84 – 29</div>
+  </div>
+
+  <div class="lista-questoes-rapida" id="bolinhasContainer"></div>
+
+  <!-- Campos de estratégia ampliados -->
+  <div class="estrategias-grid">
+    <div class="campo-estrategia">
+      <label>🧠 Estratégia A</label>
+      <textarea id="campo1" placeholder="Registre o raciocínio..."></textarea>
+    </div>
+    <div class="campo-estrategia">
+      <label>📐 Estratégia B</label>
+      <textarea id="campo2" placeholder="Registre o raciocínio..."></textarea>
+    </div>
+    <div class="campo-estrategia">
+      <label>🔢 Estratégia C</label>
+      <textarea id="campo3" placeholder="Registre o raciocínio..."></textarea>
+    </div>
+    <div class="campo-estrategia">
+      <label>✨ Estratégia D</label>
+      <textarea id="campo4" placeholder="Registre o raciocínio..."></textarea>
+    </div>
+  </div>
+
+  <div class="botoes-controle">
+    <button class="btn primary" id="btnIniciarTimer">⏳ Iniciar</button>
+    <button class="btn" id="btnPararTimer">⏹️ Parar</button>
+    <button class="btn" id="btnMostrarResposta">🔎 Resposta</button>
+    <button class="btn primary" id="btnProxima">⏩ Próxima</button>
+  </div>
+
+  <div class="acoes-final">
+    <div class="feedback-tempo" id="mensagemTempo"></div>
+    <div class="resposta-correta" id="resultadoExibido"></div>
+  </div>
+  <div style="display:flex; gap:6px; margin-top:8px;">
+    <button class="btn" id="btnLimparCampos">🧽 Limpar</button>
+    <button class="btn" id="btnResetEtapa">🔄 Reiniciar etapa</button>
+  </div>
+  <footer>💥 Professor · escolha o tempo · explosão ao zerar</footer>
+</div>
+
+<!-- Container para explosão -->
+<div id="explosaoContainer" class="explosao-overlay" style="display: none;"></div>
+
+<script>
+  (function(){
+    "use strict";
+
+    const ETAPAS = [
+      { nome: "Seção 1 – Rodada Inicial", operacoes: ["84 – 29", "45 + 33", "71 – 48", "98 – 49", "57 + 39"] },
+      { nome: "Seção 2 – Rodada Intermediária", operacoes: ["65 + 19", "56 + 37", "85 – 67", "46 + 48", "83 – 38"] },
+      { nome: "Seção 3 – Rodada de Aprofundamento", operacoes: ["53 – 28", "78 – 24", "29 + 43", "64 + 32", "72 + 49", "91 – 49"] }
+    ];
+
+    const GABARITO = {
+      "84 – 29": 55, "45 + 33": 78, "71 – 48": 23, "98 – 49": 49, "57 + 39": 96,
+      "65 + 19": 84, "56 + 37": 93, "85 – 67": 18, "46 + 48": 94, "83 – 38": 45,
+      "53 – 28": 25, "78 – 24": 54, "29 + 43": 72, "64 + 32": 96, "72 + 49": 121, "91 – 49": 42
+    };
+
+    let etapaAtual = 0;
+    let indiceQuestao = 0;
+    let timerInterval = null;
+    let tempoRestante = 60;       // valor inicial (1min)
+    let timerAtivo = false;
+
+    const nomeEtapaEl = document.getElementById('nomeEtapa');
+    const contadorQuestaoEl = document.getElementById('contadorQuestao');
+    const timerDisplay = document.getElementById('timerDisplay');
+    const operacaoAtualEl = document.getElementById('operacaoAtual');
+    const bolinhasContainer = document.getElementById('bolinhasContainer');
+    const msgTempoEl = document.getElementById('mensagemTempo');
+    const resultadoExibidoEl = document.getElementById('resultadoExibido');
+
+    const campo1 = document.getElementById('campo1');
+    const campo2 = document.getElementById('campo2');
+    const campo3 = document.getElementById('campo3');
+    const campo4 = document.getElementById('campo4');
+
+    const btnIniciar = document.getElementById('btnIniciarTimer');
+    const btnParar = document.getElementById('btnPararTimer');
+    const btnMostrarResp = document.getElementById('btnMostrarResposta');
+    const btnProxima = document.getElementById('btnProxima');
+    const btnLimpar = document.getElementById('btnLimparCampos');
+    const btnResetEtapa = document.getElementById('btnResetEtapa');
+    const etapaBtns = document.querySelectorAll('.etapa-btn');
+    const explosaoContainer = document.getElementById('explosaoContainer');
+    const tempoSelect = document.getElementById('tempoSelect');
+
+    // --- Funções auxiliares ---
+    function pararTimer() {
+      if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+      timerAtivo = false;
+    }
+
+    function formatarTempo(seg) {
+      const m = Math.floor(seg / 60).toString().padStart(2, '0');
+      const s = (seg % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function atualizarDisplayTimer() {
+      timerDisplay.textContent = formatarTempo(tempoRestante);
+    }
+
+    // Obtém o tempo escolhido no seletor (em segundos)
+    function obterTempoSelecionado() {
+      return parseInt(tempoSelect.value, 10);
+    }
+
+    // Aplica o tempo selecionado como novo tempoRestante (se timer não estiver ativo)
+    function sincronizarTempoBase() {
+      if (!timerAtivo) {
+        tempoRestante = obterTempoSelecionado();
+        atualizarDisplayTimer();
+      }
+    }
+
+    // 💥 Explosão central
+    function dispararExplosao() {
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'explosao-mensagem';
+      msgDiv.innerHTML = '💥💥💥<br>TEMPO<br>ESGOTADO!<br>💥💥💥';
+      explosaoContainer.innerHTML = '';
+      explosaoContainer.appendChild(msgDiv);
+      explosaoContainer.style.display = 'flex';
+      setTimeout(() => {
+        explosaoContainer.style.display = 'none';
+        explosaoContainer.innerHTML = '';
+      }, 2500);
+    }
+
+    function iniciarContagem() {
+      if (timerAtivo) return;
+      
+      // Se o tempo atual for 0, redefine com o valor do seletor
+      if (tempoRestante <= 0) {
+        tempoRestante = obterTempoSelecionado();
+        atualizarDisplayTimer();
+        msgTempoEl.innerHTML = '';
+      }
+      
+      pararTimer();
+      timerAtivo = true;
+      msgTempoEl.innerHTML = '⏳ Correndo...';
+      
+      timerInterval = setInterval(() => {
+        if (tempoRestante > 0) {
+          tempoRestante--;
+          atualizarDisplayTimer();
+          if (tempoRestante === 0) {
+            pararTimer();
+            timerAtivo = false;
+            dispararExplosao();
+            msgTempoEl.innerHTML = '⏰ Tempo esgotado!';
+            timerDisplay.textContent = '00:00';
+          }
+        } else {
+          pararTimer();
+        }
+      }, 1000);
+    }
+
+    function resetTimerParaBase() {
+      pararTimer();
+      tempoRestante = obterTempoSelecionado();
+      atualizarDisplayTimer();
+      timerAtivo = false;
+      msgTempoEl.innerHTML = '';
+      explosaoContainer.style.display = 'none';
+      explosaoContainer.innerHTML = '';
+    }
+
+    function carregarQuestao() {
+      const etapa = ETAPAS[etapaAtual];
+      operacaoAtualEl.textContent = etapa.operacoes[indiceQuestao];
+      contadorQuestaoEl.textContent = `${indiceQuestao+1} / ${etapa.operacoes.length}`;
+      resultadoExibidoEl.textContent = '';
+      resetTimerParaBase();
+      renderizarBolinhas();
+      
+      etapaBtns.forEach((btn, idx) => btn.classList.toggle('ativo', idx === etapaAtual));
+      nomeEtapaEl.textContent = etapa.nome;
+    }
+
+    function renderizarBolinhas() {
+      const etapa = ETAPAS[etapaAtual];
+      let html = '';
+      for (let i = 0; i < etapa.operacoes.length; i++) {
+        html += `<div class="bolinha-questao ${i === indiceQuestao ? 'ativa' : ''}" data-index="${i}">${i+1}</div>`;
+      }
+      bolinhasContainer.innerHTML = html;
+      document.querySelectorAll('.bolinha-questao').forEach(bol => {
+        bol.addEventListener('click', (e) => {
+          const novoIndice = parseInt(bol.dataset.index, 10);
+          if (novoIndice === indiceQuestao) return;
+          indiceQuestao = novoIndice;
+          carregarQuestao();
+          pararTimer();
+          resetTimerParaBase();
+        });
+      });
+    }
+
+    function exibirResposta() {
+      const op = operacaoAtualEl.textContent;
+      resultadoExibidoEl.textContent = (GABARITO[op] !== undefined) ? `${GABARITO[op]}` : '?';
+    }
+
+    function proximaQuestao() {
+      const etapa = ETAPAS[etapaAtual];
+      if (indiceQuestao < etapa.operacoes.length - 1) {
+        indiceQuestao++;
+        carregarQuestao();
+        pararTimer();
+        resetTimerParaBase();
+      } else {
+        alert('🎉 Etapa concluída! Selecione outra ou reinicie.');
+      }
+    }
+
+    function limparCampos() {
+      campo1.value = campo2.value = campo3.value = campo4.value = '';
+    }
+
+    function resetarEtapa() {
+      indiceQuestao = 0;
+      carregarQuestao();
+      pararTimer();
+      resetTimerParaBase();
+    }
+
+    function setEtapa(novaEtapa) {
+      if (novaEtapa === etapaAtual) { carregarQuestao(); return; }
+      etapaAtual = novaEtapa;
+      indiceQuestao = 0;
+      carregarQuestao();
+      pararTimer();
+      resetTimerParaBase();
+    }
+
+    // --- Event listeners ---
+    btnIniciar.addEventListener('click', () => { 
+      if (tempoRestante === 0) tempoRestante = obterTempoSelecionado();
+      iniciarContagem(); 
+    });
+    
+    btnParar.addEventListener('click', () => { 
+      pararTimer(); 
+      timerAtivo = false; 
+      msgTempoEl.innerHTML = '⏸️ Pausado'; 
+    });
+    
+    btnMostrarResp.addEventListener('click', exibirResposta);
+    btnProxima.addEventListener('click', proximaQuestao);
+    btnLimpar.addEventListener('click', limparCampos);
+    btnResetEtapa.addEventListener('click', resetarEtapa);
+    
+    etapaBtns.forEach((btn) => {
+      btn.addEventListener('click', (e) => setEtapa(parseInt(btn.dataset.etapa, 10)));
+    });
+
+    // Quando o professor mudar o seletor, se o timer não estiver rodando, já atualiza o display
+    tempoSelect.addEventListener('change', () => {
+      if (!timerAtivo) {
+        tempoRestante = obterTempoSelecionado();
+        atualizarDisplayTimer();
+        msgTempoEl.innerHTML = '';
+      } else {
+        // Se estiver correndo, não altera o tempo atual, apenas avisa visualmente (opcional)
+        // Poderia mostrar uma dica, mas vou manter simples.
+      }
+    });
+
+    // Inicialização
+    (function init() {
+      etapaAtual = 0; indiceQuestao = 0;
+      // Sincroniza com o seletor padrão (60)
+      tempoRestante = obterTempoSelecionado();
+      carregarQuestao();
+      resetTimerParaBase();
+      limparCampos();
+    })();
+
+  })();
+</script>
+</body>
+</html>
